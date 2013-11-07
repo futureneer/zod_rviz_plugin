@@ -5,6 +5,7 @@
     <description>
       MagicWindow Display for rviz
     </description>
-    <message_type>sensor_msgs/Imu</message_type>
+    <message_type>sensor_msgs/Image</message_type>
+    <!-- <message_type>sensor_msgs/Image</message_type> -->
   </class>
 </library>

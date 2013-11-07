@@ -60,7 +60,7 @@ MagicWindowVisual::MagicWindowVisual( Ogre::SceneManager* scene_manager, Ogre::S
   // parent.  Ogre does the math of combining those transforms when it
   // is time to render.
   //
-  // Here we create a node to store the pose of the Imu's header frame
+  // Here we create a node to store the pose of the Image's header frame
   // relative to the RViz fixed frame.
   frame_node_ = parent_node->createChildSceneNode();
 
@@ -131,23 +131,23 @@ MagicWindowVisual::~MagicWindowVisual()
   scene_manager_->destroySceneNode( frame_node_ );
 }
 
-void MagicWindowVisual::setMessage( const sensor_msgs::Imu::ConstPtr& msg )
+void MagicWindowVisual::setMessage( const sensor_msgs::Image::ConstPtr& msg )
 {
-  const geometry_msgs::Vector3& a = msg->linear_acceleration;
+  // const geometry_msgs::Vector3& a = msg->linear_acceleration;
 
   // Convert the geometry_msgs::Vector3 to an Ogre::Vector3.
-  Ogre::Vector3 acc( a.x, a.y, a.z );
+  // Ogre::Vector3 acc( a.x, a.y, a.z );
 
   // Find the magnitude of the acceleration vector.
-  float length = acc.length();
+  // float length = acc.length();
 
   // Scale the arrow's thickness in each dimension along with its length.
-  Ogre::Vector3 scale( length, length, length );
-  acceleration_arrow_->setScale( scale );
+  // Ogre::Vector3 scale( length, length, length );
+  // acceleration_arrow_->setScale( scale );
 
   // Set the orientation of the arrow to match the direction of the
   // acceleration vector.
-  acceleration_arrow_->setDirection( acc );
+  // acceleration_arrow_->setDirection( acc );
 }
 
 // Position and orientation are passed through to the SceneNode.

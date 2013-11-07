@@ -44,6 +44,9 @@
 #include <rviz/properties/color_property.h>
 #include <rviz/properties/float_property.h>
 #include <rviz/properties/int_property.h>
+#include "rviz/properties/ros_topic_property.h"
+#include <rviz/properties/tf_frame_property.h>
+#include <rviz/properties/vector_property.h>
 #include <rviz/frame_manager.h>
 
 #include "magic_window_visual.h"
@@ -57,19 +60,29 @@ namespace magic_window_rviz_plugin
 // constructor the parameters it needs to fully initialize.
 MagicWindowDisplay::MagicWindowDisplay()
 {
-  color_property_ = new rviz::ColorProperty( "Color", QColor( 204, 51, 204 ),
-                                             "Color to draw the acceleration arrows.",
-                                             this, SLOT( updateColorAndAlpha() ));
+  // color_property_ = new rviz::ColorProperty( "Color", QColor( 204, 51, 204 ),
+  //                                            "Color to draw the acceleration arrows.",
+  //                                            this, SLOT( updateColorAndAlpha() ));
 
-  alpha_property_ = new rviz::FloatProperty( "Alpha", 1.0,
-                                             "0 is fully transparent, 1.0 is fully opaque.",
-                                             this, SLOT( updateColorAndAlpha() ));
+  // alpha_property_ = new rviz::FloatProperty( "Alpha", 1.0,
+  //                                            "0 is fully transparent, 1.0 is fully opaque.",
+  //                                            this, SLOT( updateColorAndAlpha() ));
 
-  history_length_property_ = new rviz::IntProperty( "History Length", 1,
-                                                    "Number of prior measurements to display.",
-                                                    this, SLOT( updateHistoryLength() ));
-  history_length_property_->setMin( 1 );
-  history_length_property_->setMax( 100000 );
+  // history_length_property_ = new rviz::IntProperty( "History Length", 1,
+  //                                                   "Number of prior measurements to display.",
+  //                                                   this, SLOT( updateHistoryLength() ));
+  // history_length_property_->setMin( 1 );
+  // history_length_property_->setMax( 100000 );
+
+  // image_topic_property_ = new rviz::RosTopicProperty( "Image Topic", "", ros::message_traits::datatype<sensor_msgs::Image>(), "sensor_msgs::Image topic to subscribe to.", this, SLOT( updateImageTopic() ));
+
+}
+
+void MagicWindowDisplay::updateScale(){
+
+}
+
+void MagicWindowDisplay::updateImageTopic(){
 
 }
 
@@ -85,10 +98,23 @@ MagicWindowDisplay::MagicWindowDisplay()
 // superclass.
 void MagicWindowDisplay::onInitialize()
 {
+
   MFDClass::onInitialize();
-  updateHistoryLength();
-  
+
+  // updateHistoryLength();
   // Ogre::SceneManager* m = context_->getSceneManager();
+
+  // Add Displays
+  scale_property_ = new rviz::VectorProperty( "Scale", Ogre::Vector3(1,1,1),
+    "X and Y Scaling factor for the magic window.  Z will be ignored.", this, SLOT( updateScale() ));
+
+  tf_frame_property_ = new rviz::TfFrameProperty( "Attached Frame", "<Fixed Frame>",
+    "Tf frame that the magic window follows", this, context_->getFrameManager(), true );
+
+  image_file_property_ = new rviz::StringProperty( "Image File", "",
+    "Location of an image file. If an image topic is selected, this will not be used.", this );
+
+  // Add Image Geometry
   static_visual_.reset(new MagicWindowVisual( context_->getSceneManager(), scene_node_ ));
 }
 
@@ -106,23 +132,23 @@ void MagicWindowDisplay::reset()
 // Set the current color and alpha values for each visual.
 void MagicWindowDisplay::updateColorAndAlpha()
 {
-  float alpha = alpha_property_->getFloat();
-  Ogre::ColourValue color = color_property_->getOgreColor();
+  // float alpha = alpha_property_->getFloat();
+  // Ogre::ColourValue color = color_property_->getOgreColor();
 
-  for( size_t i = 0; i < visuals_.size(); i++ )
-  {
-    visuals_[ i ]->setColor( color.r, color.g, color.b, alpha );
-  }
+  // for( size_t i = 0; i < visuals_.size(); i++ )
+  // {
+  //   visuals_[ i ]->setColor( color.r, color.g, color.b, alpha );
+  // }
 }
 
 // Set the number of past visuals to show.
-void MagicWindowDisplay::updateHistoryLength()
-{
-  visuals_.rset_capacity(history_length_property_->getInt());
-}
+// void MagicWindowDisplay::updateHistoryLength()
+// {
+//   visuals_.rset_capacity(history_length_property_->getInt());
+// }
 
 // This is our callback to handle an incoming message.
-void MagicWindowDisplay::processMessage( const sensor_msgs::Imu::ConstPtr& msg )
+void MagicWindowDisplay::processMessage( const sensor_msgs::Image::ConstPtr& msg )
 {
   // Here we call the rviz::FrameManager to get the transform from the
   // fixed frame to the frame in the header of this Imu message.  If
@@ -155,9 +181,9 @@ void MagicWindowDisplay::processMessage( const sensor_msgs::Imu::ConstPtr& msg )
   visual->setFramePosition( position );
   visual->setFrameOrientation( orientation );
 
-  float alpha = alpha_property_->getFloat();
-  Ogre::ColourValue color = color_property_->getOgreColor();
-  visual->setColor( color.r, color.g, color.b, alpha );
+  // float alpha = alpha_property_->getFloat();
+  // Ogre::ColourValue color = color_property_->getOgreColor();
+  // visual->setColor( color.r, color.g, color.b, alpha );
 
   // And send it to the end of the circular buffer
   visuals_.push_back(visual);

@@ -33,7 +33,13 @@
 #include <boost/circular_buffer.hpp>
 
 #include <sensor_msgs/Imu.h>
+#include <sensor_msgs/Image.h>
 #include <rviz/message_filter_display.h>
+#include "rviz/properties/ros_topic_property.h"
+#include <rviz/properties/tf_frame_property.h>
+#include <rviz/properties/vector_property.h>
+
+#include "rviz/display.h"
 
 namespace Ogre
 {
@@ -71,7 +77,7 @@ class MagicWindowVisual;
 // themselves are represented by a separate class, MagicWindowVisual.  The
 // idiom for the visuals is that when the objects exist, they appear
 // in the scene, and when they are deleted, they disappear.
-class MagicWindowDisplay: public rviz::MessageFilterDisplay<sensor_msgs::Imu>
+class MagicWindowDisplay: public rviz::MessageFilterDisplay<sensor_msgs::Image>
 {
 Q_OBJECT
 public:
@@ -95,19 +101,25 @@ protected:
 private Q_SLOTS:
   void updateColorAndAlpha();
   void updateHistoryLength();
+  void updateScale();
+  void updateImageTopic();
 
   // Function to handle an incoming ROS message.
 private:
-  void processMessage( const sensor_msgs::Imu::ConstPtr& msg );
+  void processMessage( const sensor_msgs::Image::ConstPtr& msg );
 
   // Storage for the list of visuals.  It is a circular buffer where
   // data gets popped from the front (oldest) and pushed to the back (newest)
   boost::circular_buffer<boost::shared_ptr<MagicWindowVisual> > visuals_;
   boost::shared_ptr<MagicWindowVisual> static_visual_;
   // User-editable property variables.
-  rviz::ColorProperty* color_property_;
-  rviz::FloatProperty* alpha_property_;
-  rviz::IntProperty* history_length_property_;
+  // rviz::ColorProperty* color_property_;
+  // rviz::FloatProperty* alpha_property_;
+  // rviz::IntProperty* history_length_property_;
+
+  rviz::VectorProperty* scale_property_;
+  rviz::TfFrameProperty* tf_frame_property_;
+  rviz::StringProperty* image_file_property_;
 };
 // END_TUTORIAL
 

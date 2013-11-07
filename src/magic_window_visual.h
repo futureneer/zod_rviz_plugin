@@ -31,6 +31,7 @@
 #define MAGICWINDOW_VISUAL_H
 
 #include <sensor_msgs/Imu.h>
+#include <sensor_msgs/Image.h>
 
 
 #include <OgreCamera.h>
@@ -75,7 +76,7 @@ public:
   virtual ~MagicWindowVisual();
 
   // Configure the visual to show the data in the message.
-  void setMessage( const sensor_msgs::Imu::ConstPtr& msg );
+  void setMessage( const sensor_msgs::Image::ConstPtr& msg );
 
   // Set the pose of the coordinate frame the message refers to.
   // These could be done inside setMessage(), but that would require
@@ -86,7 +87,7 @@ public:
   void setFrameOrientation( const Ogre::Quaternion& orientation );
 
   // Set the color and alpha of the visual, which are user-editable
-  // parameters and therefore don't come from the Imu message.
+  // parameters and therefore don't come from the Image message.
   void setColor( float r, float g, float b, float a );
 
   Ogre::MovablePlane* mPlane;
@@ -99,7 +100,7 @@ private:
   boost::shared_ptr<rviz::Arrow> acceleration_arrow_;
 
   // A SceneNode whose pose is set to match the coordinate frame of
-  // the Imu message header.
+  // the Image message header.
   Ogre::SceneNode* frame_node_;
 
   // The SceneManager, kept here only so the destructor can ask it to
@@ -110,4 +111,4 @@ private:
 
 } // end namespace magic_window_rviz_plugin
 
-#endif // IMU_VISUAL_H
+#endif // IMAGE_VISUAL_H
