@@ -1,0 +1,10 @@
+<library path="lib/libmagic_window_rviz_plugin">
+  <class name="magic_window_rviz_plugin/MagicWindow"
+         type="magic_window_rviz_plugin::MagicWindowDisplay"
+         base_class_type="rviz::Display">
+    <description>
+      MagicWindow Display for rviz
+    </description>
+    <message_type>sensor_msgs/Imu</message_type>
+  </class>
+</library>
