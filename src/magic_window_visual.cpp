@@ -53,37 +53,9 @@ namespace magic_window_rviz_plugin
 // BEGIN_TUTORIAL
 MagicWindowVisual::MagicWindowVisual( Ogre::SceneManager* scene_manager, Ogre::SceneNode* parent_node )
 {
+  // Get OGRE Environment pointers
   scene_manager_ = scene_manager;
-
-  // Ogre::SceneNode s form a tree, with each node storing the
-  // transform (position and orientation) of itself relative to its
-  // parent.  Ogre does the math of combining those transforms when it
-  // is time to render.
-  //
-  // Here we create a node to store the pose of the Image's header frame
-  // relative to the RViz fixed frame.
   frame_node_ = parent_node->createChildSceneNode();
-
-  // We create the arrow object within the frame node so that we can
-  // set its position and direction relative to its header frame.
-  // acceleration_arrow_.reset(new rviz::Arrow( scene_manager_, frame_node_ ));
-
-
-
-  // // Adding a textured plane ///////////////////////////////////////////////////
-  // Ogre::MaterialPtr mat = Ogre::MaterialManager::getSingleton().create("PlaneMat", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
-  // mat->getTechnique(0)->setLightingEnabled(true);
-  // mat->getTechnique(0)->setAmbient( 0.5, 0.5, 0.5 );
-
-  // Ogre::MaterialPtr material_ = Ogre::MaterialManager::getSingleton().create( "Test", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
-  // material_->setReceiveShadows(false);
-  // material_->getTechnique(0)->setLightingEnabled(true);
-  // material_->getTechnique(0)->setAmbient( 0.5, 0.5, 0.5 );
-  // tuisTexture = mat->getTechnique(0)->getPass(0)->createTextureUnitState("/home/kel/catkin_ws/src/visualization_MagicWindow/forest.jpg");
-
-
-  // mat->getTechnique(0)->setLightingEnabled(true);
-  // mat->getTechnique(0)->setAmbient( 0.5, 0.5, 0.5 );
 
   // Get image into QImage
   QString path = "/home/kel/catkin_ws/src/magic_window_rviz_plugin/test_images/forest.jpg";
@@ -166,7 +138,6 @@ void MagicWindowVisual::setColor( float r, float g, float b, float a )
 {
   acceleration_arrow_->setColor( r, g, b, a );
 }
-// END_TUTORIAL
 
 } // end namespace magic_window_rviz_plugin
 

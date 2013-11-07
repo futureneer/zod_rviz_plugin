@@ -44,27 +44,17 @@
 #include <OgreConfigFile.h>
 #include <OgreMeshManager.h>
 
-namespace Ogre
-{
+namespace Ogre{
 class Vector3;
 class Quaternion;
 }
 
-namespace rviz
-{
+namespace rviz{
 class Arrow;
 }
 
-namespace magic_window_rviz_plugin
-{
+namespace magic_window_rviz_plugin{
 
-// BEGIN_TUTORIAL
-// Declare the visual class for this display.
-//
-// Each instance of MagicWindowVisual represents the visualization of a single
-// sensor_msgs::Imu message.  Currently it just shows an arrow with
-// the direction and magnitude of the acceleration vector, but could
-// easily be expanded to include more of the message data.
 class MagicWindowVisual
 {
 public:
