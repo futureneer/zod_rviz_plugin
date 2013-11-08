@@ -63,6 +63,9 @@ public:
   void setFrameOrientation( const Ogre::Quaternion& orientation );
   void updateImage(const QString& image_path);
   void updateImage(const QImage& image);
+  void updateImageFromMsg(const sensor_msgs::Image::ConstPtr& msg);
+  template<typename T>
+  void normalize( T* image_data, size_t image_data_size, std::vector<uint8_t> &buffer  );
   Ogre::MovablePlane* mPlane;
   Ogre::Entity* mPlaneEnt;
   Ogre::SceneNode* mPlaneNode;

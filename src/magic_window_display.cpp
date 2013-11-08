@@ -117,9 +117,11 @@ void MagicWindowDisplay::updateImage(){
 void MagicWindowDisplay::processMessage( const sensor_msgs::Image::ConstPtr& msg ){
   // Get image data from message and push into QImage
   // QImage temp(&(msg->data[0]), msg->width, msg->height, QImage::Format_RGB888);
-  QImage temp(&(msg->data[0]), msg->width, msg->height, QImage::Format_ARGB32);
-  QImage image = temp;
-  static_visual_->updateImage(image);
+  // QImage temp(&(msg->data[0]), msg->width, msg->height, QImage::Format_RGB888);
+  // QImage image = temp;
+  // static_visual_->updateImage(image);
+
+  static_visual_->updateImageFromMsg(msg);
 }
 
 } // end namespace magic_window_rviz_plugin

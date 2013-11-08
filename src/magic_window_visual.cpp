@@ -46,6 +46,7 @@
 #include <rviz/ogre_helpers/arrow.h>
 
 #include "magic_window_visual.h"
+#include <sensor_msgs/image_encodings.h>
 
 namespace magic_window_rviz_plugin
 {
@@ -172,6 +173,175 @@ void MagicWindowVisual::updateImage(const QImage& image){
     mat->getTechnique(0)->setCullingMode( Ogre::CULL_NONE );
   }else{
     std::cerr<<"Tried to assign texture from a non image"<<std::endl;
+  }
+}
+
+void MagicWindowVisual::updateImageFromMsg(const sensor_msgs::Image::ConstPtr& msg){
+  sensor_msgs::Image::ConstPtr image = msg;
+  // bool new_image = false;
+  // {
+  //   boost::mutex::scoped_lock lock(mutex_);
+
+  //   image = current_image_;
+  //   new_image = new_image_;
+  // }
+
+  // if (!image || !new_image)
+  // {
+  //   return false;
+  // }
+
+  // new_image_ = false;
+
+  // if (image->data.empty())
+  // {
+  //   return false;
+  // }
+
+  Ogre::PixelFormat format = Ogre::PF_R8G8B8;
+  Ogre::Image ogre_image;
+  std::vector<uint8_t> buffer;
+
+  uint8_t* imageDataPtr = (uint8_t*)&image->data[0];
+  size_t imageDataSize = image->data.size();
+
+  if (image->encoding == sensor_msgs::image_encodings::RGB8)
+  {
+    format = Ogre::PF_BYTE_RGB;
+  }
+  else if (image->encoding == sensor_msgs::image_encodings::RGBA8)
+  {
+    format = Ogre::PF_BYTE_RGBA;
+  }
+  else if (image->encoding == sensor_msgs::image_encodings::TYPE_8UC4 ||
+           image->encoding == sensor_msgs::image_encodings::TYPE_8SC4 ||
+           image->encoding == sensor_msgs::image_encodings::BGRA8)
+  {
+    format = Ogre::PF_BYTE_BGRA;
+  }
+  else if (image->encoding == sensor_msgs::image_encodings::TYPE_8UC3 ||
+           image->encoding == sensor_msgs::image_encodings::TYPE_8SC3 ||
+           image->encoding == sensor_msgs::image_encodings::BGR8)
+  {
+    format = Ogre::PF_BYTE_BGR;
+  }
+  else if (image->encoding == sensor_msgs::image_encodings::TYPE_8UC1 ||
+           image->encoding == sensor_msgs::image_encodings::TYPE_8SC1 ||
+           image->encoding == sensor_msgs::image_encodings::MONO8)
+  {
+    format = Ogre::PF_BYTE_L;
+  }
+  else if (image->encoding == sensor_msgs::image_encodings::TYPE_16UC1 ||
+           image->encoding == sensor_msgs::image_encodings::TYPE_16SC1 ||
+           image->encoding == sensor_msgs::image_encodings::MONO16)
+  {
+    imageDataSize /= sizeof(uint16_t);
+    normalize<uint16_t>( (uint16_t*)&image->data[0], imageDataSize, buffer );
+    format = Ogre::PF_BYTE_L;
+    imageDataPtr = &buffer[0];
+  }
+  else if (image->encoding.find("bayer") == 0)
+  {
+    format = Ogre::PF_BYTE_L;
+  }
+  else if (image->encoding == sensor_msgs::image_encodings::TYPE_32FC1)
+  {
+    imageDataSize /= sizeof(float);
+    normalize<float>( (float*)&image->data[0], imageDataSize, buffer );
+    format = Ogre::PF_BYTE_L;
+    imageDataPtr = &buffer[0];
+  }
+  else
+  {
+    // throw UnsupportedImageEncoding(image->encoding);
+    std::cerr<<"unsupported encoding"<<std::endl;
+  }
+
+  // width_ = image->width;
+  // height_ = image->height;
+
+  // TODO: Support different steps/strides
+
+  Ogre::DataStreamPtr pixel_stream;
+  pixel_stream.bind(new Ogre::MemoryDataStream(imageDataPtr, imageDataSize));
+
+  try
+  {
+    ogre_image.loadRawData(pixel_stream, image->width, image->height, 1, format, 1, 0);
+  }
+  catch (Ogre::Exception& e)
+  {
+
+    std::cerr<<"could not load raw data"<<std::endl;
+    // TODO: signal error better
+    // ROS_ERROR("Error loading image: %s", e.what());
+    // return false;
+  }
+
+
+// Create a texture from the image
+  Ogre::TextureManager* manager = Ogre::TextureManager::getSingletonPtr();
+  manager->remove("plane_texture");
+  Ogre::TexturePtr texture = manager->loadImage("plane_texture", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,ogre_image);
+
+  Ogre::MaterialPtr mat = Ogre::MaterialManager::getSingleton().getByName("plane_material", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+
+  mat->getTechnique(0)->getPass(0)->getTextureUnitState(0)->setTextureName("plane_texture");
+  mat->getTechnique(0)->setCullingMode( Ogre::CULL_NONE );
+}
+
+template<typename T>
+void MagicWindowVisual::normalize( T* image_data, size_t image_data_size, std::vector<uint8_t> &buffer  )
+{
+  // Prepare output buffer
+  buffer.resize(image_data_size, 0);
+
+  T minValue;
+  T maxValue;
+
+  // if ( normalize_ )
+  // {
+  //   T* input_ptr = image_data;
+  //   // Find min. and max. pixel value
+  //   minValue = std::numeric_limits<T>::max();
+  //   maxValue = std::numeric_limits<T>::min();
+  //   for( unsigned i = 0; i < image_data_size; ++i )
+  //   {
+  //     minValue = std::min( minValue, *input_ptr );
+  //     maxValue = std::max( maxValue, *input_ptr );
+  //     input_ptr++;
+  //   }
+
+  //   if ( median_frames_ > 1 )
+  //   {
+  //     minValue = updateMedian( min_buffer_, minValue );
+  //     maxValue = updateMedian( max_buffer_, maxValue );
+  //   }
+  // }
+  // else
+  // {
+    // set fixed min/max
+    minValue = 0;
+    maxValue = 1;
+  // }
+
+  // Rescale floating point image and convert it to 8-bit
+  double range = maxValue - minValue;
+  if( range > 0.0 )
+  {
+    T* input_ptr = image_data;
+
+    // Pointer to output buffer
+    uint8_t* output_ptr = &buffer[0];
+
+    // Rescale and quantize
+    for( size_t i = 0; i < image_data_size; ++i, ++output_ptr, ++input_ptr )
+    {
+      double val = (double(*input_ptr - minValue) / range);
+      if ( val < 0 ) val = 0;
+      if ( val > 1 ) val = 1;
+      *output_ptr = val * 255u;
+    }
   }
 }
 
