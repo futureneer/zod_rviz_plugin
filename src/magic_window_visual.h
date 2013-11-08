@@ -49,56 +49,29 @@ class Vector3;
 class Quaternion;
 }
 
-namespace rviz{
-class Arrow;
-}
-
 namespace magic_window_rviz_plugin{
 
 class MagicWindowVisual
 {
 public:
-  // Constructor.  Creates the visual stuff and puts it into the
-  // scene, but in an unconfigured state.
   MagicWindowVisual( Ogre::SceneManager* scene_manager, Ogre::SceneNode* parent_node );
-
-  // Destructor.  Removes the visual stuff from the scene.
   virtual ~MagicWindowVisual();
-
-  // Configure the visual to show the data in the message.
   void setMessage( const sensor_msgs::Image::ConstPtr& msg );
-
-  // Set the pose of the coordinate frame the message refers to.
-  // These could be done inside setMessage(), but that would require
-  // calls to FrameManager and error handling inside setMessage(),
-  // which doesn't seem as clean.  This way MagicWindowVisual is only
-  // responsible for visualization.
+  void setFrameScale( const Ogre::Vector3& scale);
+  void setFrameScale( const float& scale);
   void setFramePosition( const Ogre::Vector3& position );
   void setFrameOrientation( const Ogre::Quaternion& orientation );
-
-  // Set the color and alpha of the visual, which are user-editable
-  // parameters and therefore don't come from the Image message.
-  void setColor( float r, float g, float b, float a );
-
+  void updateImage(const QString& image_path);
   Ogre::MovablePlane* mPlane;
   Ogre::Entity* mPlaneEnt;
   Ogre::SceneNode* mPlaneNode;
   Ogre::TextureUnitState* tuisTexture;
 
 private:
-  // The object implementing the actual arrow shape
-  boost::shared_ptr<rviz::Arrow> acceleration_arrow_;
-
-  // A SceneNode whose pose is set to match the coordinate frame of
-  // the Image message header.
   Ogre::SceneNode* frame_node_;
-
-  // The SceneManager, kept here only so the destructor can ask it to
-  // destroy the ``frame_node_``.
   Ogre::SceneManager* scene_manager_;
 };
-// END_TUTORIAL
 
 } // end namespace magic_window_rviz_plugin
 
-#endif // IMAGE_VISUAL_H
+#endif // MAGICWINDOW_VISUAL_H

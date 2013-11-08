@@ -57,31 +57,32 @@ namespace magic_window_rviz_plugin
 
 MagicWindowDisplay::MagicWindowDisplay(){}
 
-void MagicWindowDisplay::updateScale(){
-
-}
-
-void MagicWindowDisplay::updateImageTopic(){
-
-}
-
 void MagicWindowDisplay::onInitialize(){
 
   // Initialize Superclass
   MFDClass::onInitialize();
 
   // Add Displays
-  scale_property_ = new rviz::VectorProperty( "Scale", Ogre::Vector3(1,1,1),
+  // scale_property_ = new rviz::VectorProperty( "Scale", Ogre::Vector3(1,1,1),
+    // "X and Y Scaling factor for the magic window.  Z will be ignored.", this, SLOT( updateScale() ));
+
+  scale_property_ = new rviz::FloatProperty( "Scale", 1.0,
     "X and Y Scaling factor for the magic window.  Z will be ignored.", this, SLOT( updateScale() ));
 
   tf_frame_property_ = new rviz::TfFrameProperty( "Attached Frame", "<Fixed Frame>",
     "Tf frame that the magic window follows", this, context_->getFrameManager(), true );
 
   image_file_property_ = new rviz::StringProperty( "Image File", "",
-    "Location of an image file. If an image topic is selected, this will not be used.", this );
+    "Location of an image file. If an image topic is selected, this will not be used.", this, SLOT( updateImage() ) );
 
   // Add Image Geometry
   static_visual_.reset(new MagicWindowVisual( context_->getSceneManager(), scene_node_ ));
+
+  ros::NodeHandle nh;
+  update_timer_ = nh.createTimer(ros::Duration(0.03), &MagicWindowDisplay::updatePosition, this);
+  // ros::Timer timer = nh.createTimer(ros::Duration(0.1), &Foo::callback, &foo_object)
+  update_timer_.start();
+
 }
 
 MagicWindowDisplay::~MagicWindowDisplay(){}
@@ -89,49 +90,60 @@ MagicWindowDisplay::~MagicWindowDisplay(){}
 // Clear the visuals by deleting their objects.
 void MagicWindowDisplay::reset(){
   MFDClass::reset();
-  visuals_.clear();
+  // visuals_.clear();
+  update_timer_.stop();
+}
+
+void MagicWindowDisplay::updatePosition(const ros::TimerEvent& event){
+  Ogre::Quaternion orientation;
+  Ogre::Vector3 position;
+  context_->getFrameManager()->getTransform( tf_frame_property_->getStdString(), ros::Time(), position, orientation );
+  static_visual_->setFramePosition( position );
+  static_visual_->setFrameOrientation( orientation );
+}
+
+void MagicWindowDisplay::updateScale(){
+  static_visual_->setFrameScale(scale_property_->getFloat());
+}
+
+void MagicWindowDisplay::updateImage(){
+  static_visual_->updateImage(image_file_property_->getString());
 }
 
 // This is our callback to handle an incoming message.
-void MagicWindowDisplay::processMessage( const sensor_msgs::Image::ConstPtr& msg )
-{
-  // Here we call the rviz::FrameManager to get the transform from the
-  // fixed frame to the frame in the header of this Imu message.  If
-  // it fails, we can't do anything else so we return.
-  Ogre::Quaternion orientation;
-  Ogre::Vector3 position;
-  if( !context_->getFrameManager()->getTransform( msg->header.frame_id,
-                                                  msg->header.stamp,
-                                                  position, orientation ))
-  {
-    ROS_DEBUG( "Error transforming from frame '%s' to frame '%s'",
-               msg->header.frame_id.c_str(), qPrintable( fixed_frame_ ));
-    return;
-  }
+void MagicWindowDisplay::processMessage( const sensor_msgs::Image::ConstPtr& msg ){
+
+  // tf::Transformer* tf = context_->getFrameManager()->getTFClient();
+  // if( !context_->getFrameManager()->getTransform( msg->header.frame_id,
+  //                                                 msg->header.stamp,
+  //                                                 position, orientation ))
+  // {
+  //   ROS_DEBUG( "Error transforming from frame '%s' to frame '%s'",
+  //              msg->header.frame_id.c_str(), qPrintable( fixed_frame_ ));
+  //   return;
+  // }
 
   // We are keeping a circular buffer of visual pointers.  This gets
   // the next one, or creates and stores it if the buffer is not full
-  boost::shared_ptr<MagicWindowVisual> visual;
-  if( visuals_.full() )
-  {
-    visual = visuals_.front();
-  }
-  else
-  {
-    visual.reset(new MagicWindowVisual( context_->getSceneManager(), scene_node_ ));
-  }
+  // boost::shared_ptr<MagicWindowVisual> visual;
+  // if( visuals_.full() )
+  // {
+  //   visual = visuals_.front();
+  // }
+  // else
+  // {
+  //   visual.reset(new MagicWindowVisual( context_->getSceneManager(), scene_node_ ));
+  // }
 
   // Now set or update the contents of the chosen visual.
-  visual->setMessage( msg );
-  visual->setFramePosition( position );
-  visual->setFrameOrientation( orientation );
+  // static_visual_->setMessage( msg );
 
   // float alpha = alpha_property_->getFloat();
   // Ogre::ColourValue color = color_property_->getOgreColor();
   // visual->setColor( color.r, color.g, color.b, alpha );
 
   // And send it to the end of the circular buffer
-  visuals_.push_back(visual);
+  // visuals_.push_back(visual);
 }
 
 } // end namespace magic_window_rviz_plugin

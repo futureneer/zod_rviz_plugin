@@ -51,8 +51,7 @@ namespace magic_window_rviz_plugin
 {
 
 // BEGIN_TUTORIAL
-MagicWindowVisual::MagicWindowVisual( Ogre::SceneManager* scene_manager, Ogre::SceneNode* parent_node )
-{
+MagicWindowVisual::MagicWindowVisual( Ogre::SceneManager* scene_manager, Ogre::SceneNode* parent_node ){
   // Get OGRE Environment pointers
   scene_manager_ = scene_manager;
   frame_node_ = parent_node->createChildSceneNode();
@@ -61,7 +60,7 @@ MagicWindowVisual::MagicWindowVisual( Ogre::SceneManager* scene_manager, Ogre::S
   QString path = "/home/kel/catkin_ws/src/magic_window_rviz_plugin/test_images/forest.jpg";
   QString fileName = QFileInfo(path).fileName();
   QImage qImage(path);
-  std::cerr<<path.toStdString()<<std::endl;
+  std::cerr<<"Loading texture: "<<path.toStdString()<<std::endl;
 
   // Create Texture
   Ogre::TextureManager* manager = Ogre::TextureManager::getSingletonPtr();
@@ -79,32 +78,67 @@ MagicWindowVisual::MagicWindowVisual( Ogre::SceneManager* scene_manager, Ogre::S
     Ogre::PF_X8R8G8B8);
 
   // Create a texture from the image
-  Ogre::TexturePtr texture = manager->loadImage("texture_name", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,image);
+  Ogre::TexturePtr texture = manager->loadImage("plane_texture", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,image);
 
   // Create Material
-  Ogre::MaterialPtr mat = Ogre::MaterialManager::getSingleton().create("material_name", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+  Ogre::MaterialPtr mat = Ogre::MaterialManager::getSingleton().create("plane_material", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
   mat->getTechnique(0)->getPass(0)->removeAllTextureUnitStates();
-  mat->getTechnique(0)->getPass(0)->createTextureUnitState("texture_name");
+  mat->getTechnique(0)->getPass(0)->createTextureUnitState("plane_texture");
+  mat->getTechnique(0)->setCullingMode( Ogre::CULL_NONE );
 
   mPlane = new Ogre::MovablePlane("Plane");
   mPlane->d = 0;
   mPlane->normal = Ogre::Vector3::UNIT_Y;
-  Ogre::MeshManager::getSingleton().createPlane("mesh_name", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, *mPlane, 1, 1, 1, 1, true, 1, 1, 1, Ogre::Vector3::UNIT_Z);
-  mPlaneEnt = scene_manager_->createEntity("entity_name", "mesh_name");
-  mPlaneEnt->setMaterialName("material_name");
- 
-  // mPlaneNode = scene_manager_->getRootSceneNode()->createChildSceneNode();
+  Ogre::MeshManager::getSingleton().createPlane("plane_mesh", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, *mPlane, 1, 1, 1, 1, true, 1, 1, 1, Ogre::Vector3::UNIT_Z);
+  mPlaneEnt = scene_manager_->createEntity("plane_entity", "plane_mesh");
+  mPlaneEnt->setMaterialName("plane_material");
+  // Add to scene
   frame_node_->attachObject(mPlaneEnt);
 }
 
-MagicWindowVisual::~MagicWindowVisual()
-{
+
+MagicWindowVisual::~MagicWindowVisual(){
   // Destroy the frame node since we don't need it anymore.
   scene_manager_->destroySceneNode( frame_node_ );
 }
 
-void MagicWindowVisual::setMessage( const sensor_msgs::Image::ConstPtr& msg )
-{
+void MagicWindowVisual::updateImage(const QString& image_path){
+  // Get image into QImage
+  QString path = image_path;
+  QString fileName = QFileInfo(path).fileName();
+  QImage qImage(path);
+  std::cerr<<"Loading texture: "<<path.toStdString()<<std::endl;
+  if (!qImage.isNull()){
+
+    // Create Texture
+    Ogre::TextureManager* manager = Ogre::TextureManager::getSingletonPtr();
+
+    // Convert to 32-bit RGB
+    if (qImage.format() != QImage::Format_RGB32)
+      qImage = qImage.convertToFormat(QImage::Format_RGB32);
+    
+    // Create an Ogre::Image from the QImage
+    Ogre::Image image;
+    image.loadDynamicImage(
+      qImage.bits(), 
+      qImage.width(), 
+      qImage.height(), 
+      Ogre::PF_X8R8G8B8);
+
+    // Create a texture from the image
+    manager->remove("plane_texture");
+    Ogre::TexturePtr texture = manager->loadImage("plane_texture", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,image);
+
+    Ogre::MaterialPtr mat = Ogre::MaterialManager::getSingleton().getByName("plane_material", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+
+    mat->getTechnique(0)->getPass(0)->getTextureUnitState(0)->setTextureName("plane_texture");
+    mat->getTechnique(0)->setCullingMode( Ogre::CULL_NONE );
+  }else{
+    std::cerr<<"Path does not point to a real image: "<<path.toStdString()<<std::endl;
+  }
+}
+
+void MagicWindowVisual::setMessage( const sensor_msgs::Image::ConstPtr& msg ){
   // const geometry_msgs::Vector3& a = msg->linear_acceleration;
 
   // Convert the geometry_msgs::Vector3 to an Ogre::Vector3.
@@ -122,21 +156,20 @@ void MagicWindowVisual::setMessage( const sensor_msgs::Image::ConstPtr& msg )
   // acceleration_arrow_->setDirection( acc );
 }
 
-// Position and orientation are passed through to the SceneNode.
-void MagicWindowVisual::setFramePosition( const Ogre::Vector3& position )
-{
+void MagicWindowVisual::setFrameScale( const Ogre::Vector3& scale){
+  frame_node_->setScale(scale);
+}
+
+void MagicWindowVisual::setFrameScale( const float& scale){
+  frame_node_->setScale(scale,scale,scale);
+}
+
+void MagicWindowVisual::setFramePosition( const Ogre::Vector3& position ){
   frame_node_->setPosition( position );
 }
 
-void MagicWindowVisual::setFrameOrientation( const Ogre::Quaternion& orientation )
-{
+void MagicWindowVisual::setFrameOrientation( const Ogre::Quaternion& orientation ){
   frame_node_->setOrientation( orientation );
-}
-
-// Color is passed through to the Arrow object.
-void MagicWindowVisual::setColor( float r, float g, float b, float a )
-{
-  acceleration_arrow_->setColor( r, g, b, a );
 }
 
 } // end namespace magic_window_rviz_plugin

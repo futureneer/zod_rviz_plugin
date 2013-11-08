@@ -69,15 +69,19 @@ private Q_SLOTS:
   void updateColorAndAlpha();
   void updateHistoryLength();
   void updateScale();
+  void updateImage();
   void updateImageTopic();
+  void updatePosition(const ros::TimerEvent& event);
 private:
   void processMessage( const sensor_msgs::Image::ConstPtr& msg );
   // Variables
-  boost::circular_buffer<boost::shared_ptr<MagicWindowVisual> > visuals_;
+  // boost::circular_buffer<boost::shared_ptr<MagicWindowVisual> > visuals_;
   boost::shared_ptr<MagicWindowVisual> static_visual_;
-  rviz::VectorProperty* scale_property_;
+  // rviz::VectorProperty* scale_property_;
+  rviz::FloatProperty* scale_property_;
   rviz::TfFrameProperty* tf_frame_property_;
   rviz::StringProperty* image_file_property_;
+  ros::Timer update_timer_;
 };
 
 } // end namespace magic_window_rviz_plugin
