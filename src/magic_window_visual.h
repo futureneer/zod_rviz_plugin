@@ -62,6 +62,7 @@ public:
   void setFramePosition( const Ogre::Vector3& position );
   void setFrameOrientation( const Ogre::Quaternion& orientation );
   void updateImage(const QString& image_path);
+  void updateImage(const QImage& image);
   Ogre::MovablePlane* mPlane;
   Ogre::Entity* mPlaneEnt;
   Ogre::SceneNode* mPlaneNode;

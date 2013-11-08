@@ -37,6 +37,7 @@
 
 #include <tf/transform_listener.h>
 
+#include <iostream>
 #include <QImage>
 #include <QPainter>
 
@@ -85,13 +86,14 @@ void MagicWindowDisplay::onInitialize(){
 
 }
 
-MagicWindowDisplay::~MagicWindowDisplay(){}
+MagicWindowDisplay::~MagicWindowDisplay(){
+  update_timer_.stop();
+}
 
 // Clear the visuals by deleting their objects.
 void MagicWindowDisplay::reset(){
   MFDClass::reset();
   // visuals_.clear();
-  update_timer_.stop();
 }
 
 void MagicWindowDisplay::updatePosition(const ros::TimerEvent& event){
@@ -100,6 +102,7 @@ void MagicWindowDisplay::updatePosition(const ros::TimerEvent& event){
   context_->getFrameManager()->getTransform( tf_frame_property_->getStdString(), ros::Time(), position, orientation );
   static_visual_->setFramePosition( position );
   static_visual_->setFrameOrientation( orientation );
+  // std::cerr<<"updated"<<std::endl;
 }
 
 void MagicWindowDisplay::updateScale(){
@@ -112,38 +115,11 @@ void MagicWindowDisplay::updateImage(){
 
 // This is our callback to handle an incoming message.
 void MagicWindowDisplay::processMessage( const sensor_msgs::Image::ConstPtr& msg ){
-
-  // tf::Transformer* tf = context_->getFrameManager()->getTFClient();
-  // if( !context_->getFrameManager()->getTransform( msg->header.frame_id,
-  //                                                 msg->header.stamp,
-  //                                                 position, orientation ))
-  // {
-  //   ROS_DEBUG( "Error transforming from frame '%s' to frame '%s'",
-  //              msg->header.frame_id.c_str(), qPrintable( fixed_frame_ ));
-  //   return;
-  // }
-
-  // We are keeping a circular buffer of visual pointers.  This gets
-  // the next one, or creates and stores it if the buffer is not full
-  // boost::shared_ptr<MagicWindowVisual> visual;
-  // if( visuals_.full() )
-  // {
-  //   visual = visuals_.front();
-  // }
-  // else
-  // {
-  //   visual.reset(new MagicWindowVisual( context_->getSceneManager(), scene_node_ ));
-  // }
-
-  // Now set or update the contents of the chosen visual.
-  // static_visual_->setMessage( msg );
-
-  // float alpha = alpha_property_->getFloat();
-  // Ogre::ColourValue color = color_property_->getOgreColor();
-  // visual->setColor( color.r, color.g, color.b, alpha );
-
-  // And send it to the end of the circular buffer
-  // visuals_.push_back(visual);
+  // Get image data from message and push into QImage
+  // QImage temp(&(msg->data[0]), msg->width, msg->height, QImage::Format_RGB888);
+  QImage temp(&(msg->data[0]), msg->width, msg->height, QImage::Format_ARGB32);
+  QImage image = temp;
+  static_visual_->updateImage(image);
 }
 
 } // end namespace magic_window_rviz_plugin

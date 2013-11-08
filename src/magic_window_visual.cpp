@@ -100,6 +100,11 @@ MagicWindowVisual::MagicWindowVisual( Ogre::SceneManager* scene_manager, Ogre::S
 MagicWindowVisual::~MagicWindowVisual(){
   // Destroy the frame node since we don't need it anymore.
   scene_manager_->destroySceneNode( frame_node_ );
+  scene_manager_->destroyEntity("plane_entity");
+  Ogre::TextureManager::getSingletonPtr()->remove("plane_texture");
+  Ogre::MaterialManager::getSingleton().remove("plane_material");
+  Ogre::MeshManager::getSingleton().remove("plane_mesh");
+
 }
 
 void MagicWindowVisual::updateImage(const QString& image_path){
@@ -135,6 +140,38 @@ void MagicWindowVisual::updateImage(const QString& image_path){
     mat->getTechnique(0)->setCullingMode( Ogre::CULL_NONE );
   }else{
     std::cerr<<"Path does not point to a real image: "<<path.toStdString()<<std::endl;
+  }
+}
+
+void MagicWindowVisual::updateImage(const QImage& image){
+  // Get image into QImage
+  QImage qImage = QImage(image);
+  if (!qImage.isNull()){
+    // Create Texture
+    Ogre::TextureManager* manager = Ogre::TextureManager::getSingletonPtr();
+
+    // Convert to 32-bit RGB
+    if (qImage.format() != QImage::Format_RGB32)
+      qImage = qImage.convertToFormat(QImage::Format_RGB32);
+    
+    // Create an Ogre::Image from the QImage
+    Ogre::Image image;
+    image.loadDynamicImage(
+      qImage.bits(), 
+      qImage.width(), 
+      qImage.height(), 
+      Ogre::PF_X8R8G8B8);
+
+    // Create a texture from the image
+    manager->remove("plane_texture");
+    Ogre::TexturePtr texture = manager->loadImage("plane_texture", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,image);
+
+    Ogre::MaterialPtr mat = Ogre::MaterialManager::getSingleton().getByName("plane_material", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+
+    mat->getTechnique(0)->getPass(0)->getTextureUnitState(0)->setTextureName("plane_texture");
+    mat->getTechnique(0)->setCullingMode( Ogre::CULL_NONE );
+  }else{
+    std::cerr<<"Tried to assign texture from a non image"<<std::endl;
   }
 }
 
