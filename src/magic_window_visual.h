@@ -27,8 +27,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef MAGICWINDOW_VISUAL_H
-#define MAGICWINDOW_VISUAL_H
+#ifndef ZOD_VISUAL_H
+#define ZOD_VISUAL_H
 
 #include <sensor_msgs/Imu.h>
 #include <sensor_msgs/Image.h>
@@ -49,13 +49,13 @@ class Vector3;
 class Quaternion;
 }
 
-namespace magic_window_rviz_plugin{
+namespace zod_rviz_plugin{
 
-class MagicWindowVisual
+class ZodVisual
 {
 public:
-  MagicWindowVisual( Ogre::SceneManager* scene_manager, Ogre::SceneNode* parent_node );
-  virtual ~MagicWindowVisual();
+  ZodVisual( Ogre::SceneManager* scene_manager, Ogre::SceneNode* parent_node );
+  virtual ~ZodVisual();
   void setMessage( const sensor_msgs::Image::ConstPtr& msg );
   void setFrameScale( const Ogre::Vector3& scale);
   void setFrameScale( const float& scale);
@@ -76,6 +76,6 @@ private:
   Ogre::SceneManager* scene_manager_;
 };
 
-} // end namespace magic_window_rviz_plugin
+} // end namespace zod_rviz_plugin
 
-#endif // MAGICWINDOW_VISUAL_H
+#endif // ZOD_VISUAL_H

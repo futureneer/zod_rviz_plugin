@@ -28,8 +28,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef MAGICWINDOW_DISPLAY_H
-#define MAGICWINDOW_DISPLAY_H
+#ifndef ZOD_DISPLAY_H
+#define ZOD_DISPLAY_H
 
 #include <boost/circular_buffer.hpp>
 
@@ -51,17 +51,17 @@ class StringProperty;
 class TfFrameProperty;
 }
 
-namespace magic_window_rviz_plugin
+namespace zod_rviz_plugin
 {
 
-class MagicWindowVisual;
+class ZodVisual;
 
-class MagicWindowDisplay: public rviz::MessageFilterDisplay<sensor_msgs::Image>
+class ZodDisplay: public rviz::MessageFilterDisplay<sensor_msgs::Image>
 {
 Q_OBJECT
 public:
-  MagicWindowDisplay();
-  virtual ~MagicWindowDisplay();
+  ZodDisplay();
+  virtual ~ZodDisplay();
 protected:
   virtual void onInitialize();
   virtual void reset();
@@ -75,8 +75,8 @@ private Q_SLOTS:
 private:
   void processMessage( const sensor_msgs::Image::ConstPtr& msg );
   // Variables
-  // boost::circular_buffer<boost::shared_ptr<MagicWindowVisual> > visuals_;
-  boost::shared_ptr<MagicWindowVisual> static_visual_;
+  // boost::circular_buffer<boost::shared_ptr<ZodVisual> > visuals_;
+  boost::shared_ptr<ZodVisual> static_visual_;
   // rviz::VectorProperty* scale_property_;
   rviz::FloatProperty* scale_property_;
   rviz::TfFrameProperty* tf_frame_property_;
@@ -84,6 +84,6 @@ private:
   ros::Timer update_timer_;
 };
 
-} // end namespace magic_window_rviz_plugin
+} // end namespace zod_rviz_plugin
 
-#endif // MAGICWINDOW_DISPLAY_H
+#endif // ZOD_DISPLAY_H

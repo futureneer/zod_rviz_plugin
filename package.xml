@@ -1,12 +1,12 @@
 <?xml version="1.0"?>
 <package>
-  <name>magic_window_rviz_plugin</name>
+  <name>zod_rviz_plugin</name>
   <version>0.0.1</version>
-  <description>The magic_window_rviz_plugin package</description>
+  <description>The zod_rviz_plugin package</description>
 
   <maintainer email="futureneer@gmail.com">Kel Guerin</maintainer>
   <license>BSD</license>
-  <!-- <url type="website">http://ros.org/wiki/magic_window_rviz_plugin</url> -->
+  <!-- <url type="website">http://ros.org/wiki/zod_rviz_plugin</url> -->
   <author>Kel Guerin</author>
 
   <buildtool_depend>catkin</buildtool_depend>

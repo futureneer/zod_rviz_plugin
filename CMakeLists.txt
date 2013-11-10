@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(magic_window_rviz_plugin)
+project(zod_rviz_plugin)
 
 ## Find catkin macros and libraries
 
@@ -44,14 +44,14 @@ add_definitions(-DQT_NO_KEYWORDS)
 
 ## MOC HEADER FILES
 qt4_wrap_cpp(MOC_FILES
-  src/magic_window_display.h
-  src/magic_window_visual.h
+  src/zod_display.h
+  src/zod_visual.h
 )
 
 ## SET SOURCE FILES
 set(SOURCE_FILES
-  src/magic_window_display.cpp 
-  src/magic_window_visual.cpp 
+  src/zod_display.cpp 
+  src/zod_visual.cpp 
   ${MOC_FILES}
 )
 

@@ -45,20 +45,20 @@
 
 #include <rviz/ogre_helpers/arrow.h>
 
-#include "magic_window_visual.h"
+#include "zod_visual.h"
 #include <sensor_msgs/image_encodings.h>
 
-namespace magic_window_rviz_plugin
+namespace zod_rviz_plugin
 {
 
 // BEGIN_TUTORIAL
-MagicWindowVisual::MagicWindowVisual( Ogre::SceneManager* scene_manager, Ogre::SceneNode* parent_node ){
+ZodVisual::ZodVisual( Ogre::SceneManager* scene_manager, Ogre::SceneNode* parent_node ){
   // Get OGRE Environment pointers
   scene_manager_ = scene_manager;
   frame_node_ = parent_node->createChildSceneNode();
 
   // Get image into QImage
-  QString path = "/home/kel/catkin_ws/src/magic_window_rviz_plugin/test_images/forest.jpg";
+  QString path = "/home/kel/catkin_ws/src/zod_rviz_plugin/test_images/forest.jpg";
   QString fileName = QFileInfo(path).fileName();
   QImage qImage(path);
   std::cerr<<"Loading texture: "<<path.toStdString()<<std::endl;
@@ -98,7 +98,7 @@ MagicWindowVisual::MagicWindowVisual( Ogre::SceneManager* scene_manager, Ogre::S
 }
 
 
-MagicWindowVisual::~MagicWindowVisual(){
+ZodVisual::~ZodVisual(){
   // Destroy the frame node since we don't need it anymore.
   scene_manager_->destroySceneNode( frame_node_ );
   scene_manager_->destroyEntity("plane_entity");
@@ -108,7 +108,7 @@ MagicWindowVisual::~MagicWindowVisual(){
 
 }
 
-void MagicWindowVisual::updateImage(const QString& image_path){
+void ZodVisual::updateImage(const QString& image_path){
   // Get image into QImage
   QString path = image_path;
   QString fileName = QFileInfo(path).fileName();
@@ -144,7 +144,7 @@ void MagicWindowVisual::updateImage(const QString& image_path){
   }
 }
 
-void MagicWindowVisual::updateImage(const QImage& image){
+void ZodVisual::updateImage(const QImage& image){
   // Get image into QImage
   QImage qImage = QImage(image);
   if (!qImage.isNull()){
@@ -176,7 +176,7 @@ void MagicWindowVisual::updateImage(const QImage& image){
   }
 }
 
-void MagicWindowVisual::updateImageFromMsg(const sensor_msgs::Image::ConstPtr& msg){
+void ZodVisual::updateImageFromMsg(const sensor_msgs::Image::ConstPtr& msg){
   sensor_msgs::Image::ConstPtr image = msg;
   // bool new_image = false;
   // {
@@ -291,7 +291,7 @@ void MagicWindowVisual::updateImageFromMsg(const sensor_msgs::Image::ConstPtr& m
 }
 
 template<typename T>
-void MagicWindowVisual::normalize( T* image_data, size_t image_data_size, std::vector<uint8_t> &buffer  )
+void ZodVisual::normalize( T* image_data, size_t image_data_size, std::vector<uint8_t> &buffer  )
 {
   // Prepare output buffer
   buffer.resize(image_data_size, 0);
@@ -345,7 +345,7 @@ void MagicWindowVisual::normalize( T* image_data, size_t image_data_size, std::v
   }
 }
 
-void MagicWindowVisual::setMessage( const sensor_msgs::Image::ConstPtr& msg ){
+void ZodVisual::setMessage( const sensor_msgs::Image::ConstPtr& msg ){
   // const geometry_msgs::Vector3& a = msg->linear_acceleration;
 
   // Convert the geometry_msgs::Vector3 to an Ogre::Vector3.
@@ -363,21 +363,21 @@ void MagicWindowVisual::setMessage( const sensor_msgs::Image::ConstPtr& msg ){
   // acceleration_arrow_->setDirection( acc );
 }
 
-void MagicWindowVisual::setFrameScale( const Ogre::Vector3& scale){
+void ZodVisual::setFrameScale( const Ogre::Vector3& scale){
   frame_node_->setScale(scale);
 }
 
-void MagicWindowVisual::setFrameScale( const float& scale){
+void ZodVisual::setFrameScale( const float& scale){
   frame_node_->setScale(scale,scale,scale);
 }
 
-void MagicWindowVisual::setFramePosition( const Ogre::Vector3& position ){
+void ZodVisual::setFramePosition( const Ogre::Vector3& position ){
   frame_node_->setPosition( position );
 }
 
-void MagicWindowVisual::setFrameOrientation( const Ogre::Quaternion& orientation ){
+void ZodVisual::setFrameOrientation( const Ogre::Quaternion& orientation ){
   frame_node_->setOrientation( orientation );
 }
 
-} // end namespace magic_window_rviz_plugin
+} // end namespace zod_rviz_plugin
 

@@ -50,53 +50,53 @@
 #include <rviz/properties/vector_property.h>
 #include <rviz/frame_manager.h>
 
-#include "magic_window_visual.h"
-#include "magic_window_display.h"
+#include "zod_visual.h"
+#include "zod_display.h"
 
-namespace magic_window_rviz_plugin
+namespace zod_rviz_plugin
 {
 
-MagicWindowDisplay::MagicWindowDisplay(){}
+ZodDisplay::ZodDisplay(){}
 
-void MagicWindowDisplay::onInitialize(){
+void ZodDisplay::onInitialize(){
 
   // Initialize Superclass
   MFDClass::onInitialize();
 
   // Add Displays
   // scale_property_ = new rviz::VectorProperty( "Scale", Ogre::Vector3(1,1,1),
-    // "X and Y Scaling factor for the magic window.  Z will be ignored.", this, SLOT( updateScale() ));
+    // "X and Y Scaling factor for the zod pane.  Z will be ignored.", this, SLOT( updateScale() ));
 
   scale_property_ = new rviz::FloatProperty( "Scale", 1.0,
-    "X and Y Scaling factor for the magic window.  Z will be ignored.", this, SLOT( updateScale() ));
+    "X and Y Scaling factor for the zod pane.  Z will be ignored.", this, SLOT( updateScale() ));
 
   tf_frame_property_ = new rviz::TfFrameProperty( "Attached Frame", "<Fixed Frame>",
-    "Tf frame that the magic window follows", this, context_->getFrameManager(), true );
+    "Tf frame that the zod pane follows", this, context_->getFrameManager(), true );
 
   image_file_property_ = new rviz::StringProperty( "Image File", "",
     "Location of an image file. If an image topic is selected, this will not be used.", this, SLOT( updateImage() ) );
 
   // Add Image Geometry
-  static_visual_.reset(new MagicWindowVisual( context_->getSceneManager(), scene_node_ ));
+  static_visual_.reset(new ZodVisual( context_->getSceneManager(), scene_node_ ));
 
   ros::NodeHandle nh;
-  update_timer_ = nh.createTimer(ros::Duration(0.03), &MagicWindowDisplay::updatePosition, this);
+  update_timer_ = nh.createTimer(ros::Duration(0.03), &ZodDisplay::updatePosition, this);
   // ros::Timer timer = nh.createTimer(ros::Duration(0.1), &Foo::callback, &foo_object)
   update_timer_.start();
 
 }
 
-MagicWindowDisplay::~MagicWindowDisplay(){
+ZodDisplay::~ZodDisplay(){
   update_timer_.stop();
 }
 
 // Clear the visuals by deleting their objects.
-void MagicWindowDisplay::reset(){
+void ZodDisplay::reset(){
   MFDClass::reset();
   // visuals_.clear();
 }
 
-void MagicWindowDisplay::updatePosition(const ros::TimerEvent& event){
+void ZodDisplay::updatePosition(const ros::TimerEvent& event){
   Ogre::Quaternion orientation;
   Ogre::Vector3 position;
   context_->getFrameManager()->getTransform( tf_frame_property_->getStdString(), ros::Time(), position, orientation );
@@ -105,16 +105,16 @@ void MagicWindowDisplay::updatePosition(const ros::TimerEvent& event){
   // std::cerr<<"updated"<<std::endl;
 }
 
-void MagicWindowDisplay::updateScale(){
+void ZodDisplay::updateScale(){
   static_visual_->setFrameScale(scale_property_->getFloat());
 }
 
-void MagicWindowDisplay::updateImage(){
+void ZodDisplay::updateImage(){
   static_visual_->updateImage(image_file_property_->getString());
 }
 
 // This is our callback to handle an incoming message.
-void MagicWindowDisplay::processMessage( const sensor_msgs::Image::ConstPtr& msg ){
+void ZodDisplay::processMessage( const sensor_msgs::Image::ConstPtr& msg ){
   // Get image data from message and push into QImage
   // QImage temp(&(msg->data[0]), msg->width, msg->height, QImage::Format_RGB888);
   // QImage temp(&(msg->data[0]), msg->width, msg->height, QImage::Format_RGB888);
@@ -124,9 +124,9 @@ void MagicWindowDisplay::processMessage( const sensor_msgs::Image::ConstPtr& msg
   static_visual_->updateImageFromMsg(msg);
 }
 
-} // end namespace magic_window_rviz_plugin
+} // end namespace zod_rviz_plugin
 
 // Tell pluginlib about this class.  
 #include <pluginlib/class_list_macros.h>
-PLUGINLIB_EXPORT_CLASS(magic_window_rviz_plugin::MagicWindowDisplay,rviz::Display )
+PLUGINLIB_EXPORT_CLASS(zod_rviz_plugin::ZodDisplay,rviz::Display )
 
